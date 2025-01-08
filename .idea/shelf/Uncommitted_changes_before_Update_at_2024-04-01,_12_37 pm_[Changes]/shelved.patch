@@ -1,0 +1,136 @@
+Index: src/GameStart/Main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package GameStart;\r\n\r\nimport main.GamePanel;\r\nimport main.MathRogueQuest;\r\n\r\nimport javax.sound.sampled.*;\r\nimport javax.swing.*;\r\nimport java.awt.*;\r\nimport java.awt.event.*;\r\nimport java.io.IOException;\r\n\r\npublic class Main extends JFrame {\r\n    private ImageIcon titleCardIcon;\r\n    private ImageIcon helpScreenIcon;\r\n    private ImageIcon scaledBackIcon;\r\n    private ImageIcon settingsBackgroundIcon;\r\n    private ImageIcon volumeOffIcon;\r\n    private ImageIcon volumeOnIcon;\r\n    private ImageIcon emptyFrameIcon;\r\n    private boolean showHelpScreen = false;\r\n    private boolean showSettingsPage = false;\r\n    protected boolean showNewGameScreen = false;\r\n    protected boolean showLoadGameScreen = false;\r\n    private boolean showDebugMenu = false;\r\n\r\n    private boolean[][] volumeStates;\r\n    private SoundManager soundManager;\r\n    private DebugMenu debugMenu;\r\n    private GamePanel gamePanel;\r\n    private JTextField newGameUserField, newGamePasswordField, loadGameUserField, loadGamePasswordField, confirmNewGamePasswordField;\r\n\r\n\r\n    public Main() {\r\n        setTitle(\"Math Quest: Rogue Minds\");\r\n        setSize(1000, 750);\r\n        setResizable(false);\r\n        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\r\n        titleCardIcon = new ImageIcon(getClass().getResource(\"/loginUi/titleCard.png\"));\r\n        helpScreenIcon = new ImageIcon(getClass().getResource(\"/loginUi/helpScreen.png\"));\r\n        settingsBackgroundIcon = new ImageIcon(getClass().getResource(\"/loginUi/settingScreen.png\"));\r\n        emptyFrameIcon = new ImageIcon(getClass().getResource(\"/loginUi/EmptyFrame.png\"));\r\n        volumeOffIcon = new ImageIcon(getClass().getResource(\"/loginUi/vOff.png\"));\r\n        volumeOnIcon = new ImageIcon(getClass().getResource(\"/loginUi/vOn.png\"));\r\n        ImageIcon backIcon = new ImageIcon(getClass().getResource(\"/loginUi/backButton.png\"));\r\n        Image backButton = backIcon.getImage().getScaledInstance((int) (backIcon.getIconWidth() * 0.30), (int) (backIcon.getIconHeight() * 0.75), Image.SCALE_SMOOTH);\r\n        scaledBackIcon = new ImageIcon(backButton);\r\n        volumeStates = new boolean[3][10];\r\n        for (int row = 0; row < volumeStates.length; row++) {\r\n            for (int col = 0; col < volumeStates[row].length; col++) {\r\n                volumeStates[row][col] = col < 5;\r\n            }\r\n        }\r\n        GamePanel gamePanel = new GamePanel();\r\n        soundManager = new SoundManager(volumeStates);\r\n        SettingsPage settingsPage = new SettingsPage(settingsBackgroundIcon, scaledBackIcon, volumeOffIcon, volumeOnIcon, volumeStates, soundManager);\r\n        debugMenu = new DebugMenu(soundManager, gamePanel);\r\n\r\n        // Initialize JTextField components here, before JPanel initialization\r\n        \r\n        newGameUserField = new JTextField(\"Enter a username\");\r\n        newGamePasswordField = new JTextField(\"Enter a password (must contain 1-8 character)\");\r\n        confirmNewGamePasswordField = new JTextField(\"Confirm Password\");\r\n        loadGameUserField = new JTextField(\"Username\");\r\n        loadGamePasswordField = new JTextField(\"Password\");\r\n\r\n    \r\n        // Configure JTextField components (size, visibility, etc.)\r\n        // This should be done after panel is initialized if you're adding them to the panel\r\n    \r\n        JPanel panel = new JPanel() {\r\n            @Override\r\n            protected void paintComponent(Graphics g) {\r\n                super.paintComponent(g);\r\n                if (showSettingsPage) {\r\n                    settingsPage.drawSettingsPage(this, g);\r\n                } else if (showHelpScreen) {\r\n                    helpScreenIcon.paintIcon(this, g, 0, 0);\r\n                    scaledBackIcon.paintIcon(this, g, 650, 125);\r\n                } else if (showNewGameScreen || showLoadGameScreen) {\r\n                    emptyFrameIcon.paintIcon(this, g, 0, 0);\r\n                    scaledBackIcon.paintIcon(this, g, 650, 125); // Assume this is the position for the back button\r\n                } else if (showDebugMenu) {\r\n                    debugMenu.draw(g, this);\r\n                } else {\r\n                    titleCardIcon.paintIcon(this, g, 0, 0);\r\n                    drawIcons(g);\r\n                }\r\n            }\r\n\r\n            private void drawIcons(Graphics g) {\r\n                ImageIcon trophyIcon = new ImageIcon(getClass().getResource(\"/loginUi/trophy.png\"));\r\n                ImageIcon debugIcon = new ImageIcon(getClass().getResource(\"/loginUi/debug.png\"));\r\n                ImageIcon helpIcon = new ImageIcon(getClass().getResource(\"/loginUi/help.png\"));\r\n            \r\n                Graphics2D g2d = (Graphics2D) g.create(); // Create a copy of the Graphics instance for safe modifications\r\n            \r\n                g2d.setColor(Color.BLACK); // Set color for the squares\r\n            \r\n                // Set the stroke to a thicker line\r\n                Stroke originalStroke = g2d.getStroke(); // Preserve the original stroke\r\n                g2d.setStroke(new BasicStroke(3f)); // 3f defines the thickness of the stroke\r\n            \r\n                int padding = 5; // Padding around icon for the square\r\n                // Drawing black squares around icons with drawRect (for the outline) and thicker stroke\r\n                g2d.drawRect(10 - padding, 10 - padding, trophyIcon.getIconWidth() + 2 * padding, trophyIcon.getIconHeight() + 2 * padding);\r\n                g2d.drawRect(10 - padding, 75 - padding, debugIcon.getIconWidth() + 2 * padding, debugIcon.getIconHeight() + 2 * padding);\r\n                g2d.drawRect(10 - padding, 140 - padding, helpIcon.getIconWidth() + 2 * padding, helpIcon.getIconHeight() + 2 * padding);\r\n            \r\n                // Reset the stroke to the original to avoid affecting other graphics operations\r\n                g2d.setStroke(originalStroke);\r\n            \r\n                // Paint the icons over the squares\r\n                trophyIcon.paintIcon(this, g, 10, 10); // Draw trophy icon\r\n                debugIcon.paintIcon(this, g, 10, 75); // Draw bug icon\r\n                helpIcon.paintIcon(this, g, 10, 140); // Draw help icon\r\n                \r\n                g2d.dispose(); // Dispose of the graphics copy to release system resources\r\n            }\r\n        };\r\n        panel.setLayout(null); // Set the layout manager to null for absolute positioning of text fields\r\n        panel.setBackground(Color.decode(\"#3db6d1\"));\r\n    \r\n        // Set bounds and add text fields to panel here, after JPanel initialization\r\n        // Example bounds setting, adjust according to your layout\r\n        int fieldWidth = 200;\r\n        int fieldHeight = 30;\r\n        int startX = (getWidth() - fieldWidth) / 2; // Center horizontally\r\n        int startY = 300; // Position vertically as needed\r\n        newGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n        newGamePasswordField.setBounds(startX, startY + 35, fieldWidth, fieldHeight);\r\n        loadGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n        loadGamePasswordField.setBounds(startX, startY + 35, fieldWidth, fieldHeight);\r\n        confirmNewGamePasswordField.setBounds(startX, startY + 70, fieldWidth, fieldHeight);\r\n    \r\n        // Initially make text fields invisible\r\n        newGameUserField.setVisible(false);\r\n        newGamePasswordField.setVisible(false);\r\n        loadGameUserField.setVisible(false);\r\n        loadGamePasswordField.setVisible(false);\r\n        confirmNewGamePasswordField.setVisible(false);\r\n\r\n        // Add text fields to the panel\r\n        panel.add(newGameUserField);\r\n        panel.add(newGamePasswordField);\r\n        panel.add(loadGameUserField);\r\n        panel.add(loadGamePasswordField);\r\n        panel.add(confirmNewGamePasswordField);\r\n        \r\n        addMouseListenerAndKeyListeners(panel, settingsPage);\r\n        getContentPane().add(panel);\r\n        setVisible(true);\r\n    }\r\n    \r\n\r\n    private void addMouseListenerAndKeyListeners(JPanel panel, SettingsPage settingsPage) {\r\n        panel.addMouseListener(new MouseAdapter() {\r\n            @Override\r\n            public void mousePressed(MouseEvent e) {\r\n                int x = e.getX();\r\n                int y = e.getY();\r\n                // Check for back button click across different screens\r\n                if ((showHelpScreen || showSettingsPage || showNewGameScreen || showLoadGameScreen || showDebugMenu) && x >= 650 && x <= (650 + scaledBackIcon.getIconWidth()) && y >= 125 && y <= (125 + scaledBackIcon.getIconHeight())) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    // Reset screen flags\r\n                    showHelpScreen = false;\r\n                    showSettingsPage = false;\r\n                    showNewGameScreen = false;\r\n                    showLoadGameScreen = false;\r\n                    showDebugMenu = false;\r\n\r\n                    // Hide text fields explicitly\r\n                    newGameUserField.setVisible(false);\r\n                    newGamePasswordField.setVisible(false);\r\n                    confirmNewGamePasswordField.setVisible(false);\r\n                    loadGameUserField.setVisible(false);\r\n                    loadGamePasswordField.setVisible(false);\r\n        \r\n                    // Repaint the panel to reflect changes\r\n                    panel.repaint();\r\n                } else if (showSettingsPage) {\r\n                    settingsPage.handleClick(e.getX(), e.getY(), panel);\r\n                } else if (showDebugMenu) {\r\n                    debugMenu.handleClick(e.getX(), e.getY(), panel);\r\n                }else if (!showHelpScreen && !showSettingsPage && !showNewGameScreen && !showLoadGameScreen) {\r\n                    checkIconClick(x, y);\r\n                }\r\n            }\r\n\r\n            private void checkIconClick(int x, int y) {\r\n                if (x >= 10 && x <= 60 && y >= 10 && y <= 60) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    System.out.println(\"Trophy room:\");\r\n                } else if (x >= 30 && x <= 220 && y >= 585 && y <= 645) {\r\n                    toggleNewGameScreen();\r\n                } else if (x >= 287 && x <= 477 && y >= 587 && y <= 647) {\r\n                    toggleLoadGameScreen();\r\n                } else if (x >= 10 && x <= 60 && y >= 80 && y <= 130) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    toggleDebugMenu();\r\n                } else if (x >= 10 && x <= 60 && y >= 150 && y <= 200) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    toggleHelpScreen();\r\n                } else if (x >= 539 && x <= 729 && y >= 587 && y <= 647) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    toggleSettingsPage();\r\n                } else if (x >= 781 && x <= 971 && y >= 587 && y <= 647) {\r\n                    System.exit(0);\r\n                }\r\n            }\r\n            private void toggleDebugMenu() {\r\n                showDebugMenu = !showDebugMenu;\r\n                showSettingsPage = false;\r\n                showHelpScreen = false;\r\n                showNewGameScreen = false;\r\n                showLoadGameScreen = false;\r\n                panel.repaint();\r\n            }\r\n            private void toggleSettingsPage() {\r\n                showSettingsPage = !showSettingsPage;\r\n                showHelpScreen = false;\r\n                showNewGameScreen = false;\r\n                showLoadGameScreen = false;\r\n                panel.repaint();\r\n            }\r\n\r\n            private void toggleHelpScreen() {\r\n                showHelpScreen = !showHelpScreen;\r\n                showSettingsPage = false;\r\n                showNewGameScreen = false;\r\n                showLoadGameScreen = false;\r\n                panel.repaint();\r\n            }\r\n\r\n            private void toggleNewGameScreen() {\r\n                String newGame[] = new String[0];\r\n\r\n                Login.main(newGame);\r\n\r\n\r\n                showNewGameScreen = !showNewGameScreen;\r\n                soundManager.playSound(\"/sound/selectSF.wav\");\r\n                // Ensure other screens are hidden\r\n                showHelpScreen = false;\r\n                showSettingsPage = false;\r\n                showLoadGameScreen = false;\r\n                // Update visibility and bounds of text fields for the New Game screen\r\n                updateTextFieldVisibilityAndPosition();\r\n\r\n\r\n            }\r\n            \r\n            private void toggleLoadGameScreen() {\r\n                String loadGame[] = new String[0];\r\n\r\n                showLoadGameScreen = true;\r\n\r\n                Login.main(loadGame);\r\n                ;\r\n                soundManager.playSound(\"/sound/selectSF.wav\");\r\n                // Ensure other screens are hidden\r\n                showHelpScreen = false;\r\n                showSettingsPage = false;\r\n                showNewGameScreen = false;\r\n                // Update visibility and bounds of text fields for the Load Game screen\r\n                updateTextFieldVisibilityAndPosition();\r\n            }\r\n            \r\n            private void updateTextFieldVisibilityAndPosition() {\r\n                int fieldWidth = 200;\r\n                int fieldHeight = 30;\r\n                // Use Main.this to refer to the enclosing JFrame instance\r\n                int startX = (Main.this.getWidth() - fieldWidth) / 2; // Center horizontally\r\n                int startY = 250; // Adjusted for additional field, position vertically as needed\r\n            \r\n                // Adjusting visibility based on the current screen\r\n                newGameUserField.setVisible(showNewGameScreen);\r\n                newGamePasswordField.setVisible(showNewGameScreen);\r\n                confirmNewGamePasswordField.setVisible(showNewGameScreen); // Only for New Game\r\n                loadGameUserField.setVisible(showLoadGameScreen);\r\n                loadGamePasswordField.setVisible(showLoadGameScreen);\r\n            \r\n                // Setting bounds; adjust startY for each subsequent field to stack them vertically\r\n                if (showNewGameScreen) {\r\n                    newGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n                    confirmNewGamePasswordField.setBounds(startX, startY + 40, fieldWidth, fieldHeight); // Confirm Password field\r\n                    newGamePasswordField.setBounds(startX, startY + 80, fieldWidth, fieldHeight);\r\n                }\r\n                if (showLoadGameScreen) {\r\n                    loadGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n                    loadGamePasswordField.setBounds(startX, startY + 40, fieldWidth, fieldHeight);\r\n                }\r\n            \r\n                // Ensure fields related to the other screen are not visible\r\n                if (!showNewGameScreen) {\r\n                    confirmNewGamePasswordField.setVisible(false); // Hide Confirm Password field when not on New Game screen\r\n                }\r\n            \r\n                // Use Main.this to refer to the JFrame for these methods\r\n                Main.this.validate();\r\n                Main.this.repaint();\r\n            }\r\n        });\r\n\r\n        addKeyListener(new KeyAdapter() {\r\n            @Override\r\n            public void keyPressed(KeyEvent e) {\r\n                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {\r\n                    dispose();\r\n                }\r\n            }\r\n        });\r\n    }\r\n\r\n    public static void main(String[] args) {\r\n        new Main();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/GameStart/Main.java b/src/GameStart/Main.java
+--- a/src/GameStart/Main.java	(revision aad0b40b08ab0940359e5951aac986489ef4c5ec)
++++ b/src/GameStart/Main.java	(date 1711927961772)
+@@ -189,7 +189,8 @@
+             private void checkIconClick(int x, int y) {
+                 if (x >= 10 && x <= 60 && y >= 10 && y <= 60) {
+                     soundManager.playSound("/sound/selectSF.wav");
+-                    System.out.println("Trophy room:");
++                    String[] leaderBoard = new String[0];
++                    Leaderboard.main(leaderBoard);
+                 } else if (x >= 30 && x <= 220 && y >= 585 && y <= 645) {
+                     toggleNewGameScreen();
+                 } else if (x >= 287 && x <= 477 && y >= 587 && y <= 647) {
+Index: src/GameStart/ScoreEntry.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/GameStart/ScoreEntry.java b/src/GameStart/ScoreEntry.java
+new file mode 100644
+--- /dev/null	(date 1711927632578)
++++ b/src/GameStart/ScoreEntry.java	(date 1711927632578)
+@@ -0,0 +1,31 @@
++package GameStart;
++
++import javax.swing.*;
++import java.awt.*;
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.List;
++
++class ScoreEntry implements Comparable<ScoreEntry> {
++    private String playerName;
++    private int score;
++
++    public ScoreEntry(String playerName, int score) {
++        this.playerName = playerName;
++        this.score = score;
++    }
++
++    public String getPlayerName() {
++        return playerName;
++    }
++
++    public int getScore() {
++        return score;
++    }
++
++    @Override
++    public int compareTo(ScoreEntry other) {
++        // Sort in descending order based on score
++        return Integer.compare(other.score, this.score);
++    }
++}
+\ No newline at end of file
+Index: src/GameStart/Leaderboard.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/GameStart/Leaderboard.java b/src/GameStart/Leaderboard.java
+new file mode 100644
+--- /dev/null	(date 1711927869907)
++++ b/src/GameStart/Leaderboard.java	(date 1711927869907)
+@@ -0,0 +1,63 @@
++package GameStart;
++
++import javax.swing.*;
++import javax.swing.border.EmptyBorder;
++import java.awt.*;
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.List;
++
++public class Leaderboard extends JFrame {
++    private List<ScoreEntry> scores;
++    private JTextArea leaderboardTextArea;
++
++    public Leaderboard() {
++        super("Leaderboard");
++        scores = new ArrayList<>();
++        leaderboardTextArea = new JTextArea();
++        leaderboardTextArea.setEditable(false);
++        leaderboardTextArea.setFont(new Font("Arial", Font.PLAIN, 14));
++        JScrollPane scrollPane = new JScrollPane(leaderboardTextArea);
++        scrollPane.setPreferredSize(new Dimension(400, 300));
++        JPanel panel = new JPanel();
++        panel.setLayout(new BorderLayout());
++        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
++        panel.setBackground(new Color(230, 230, 230));
++        panel.add(scrollPane, BorderLayout.CENTER);
++        add(panel);
++        setSize(500, 400);
++        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
++        setLocationRelativeTo(null);
++        setVisible(true);
++    }
++
++    public void addScore(String playerName, int score) {
++        scores.add(new ScoreEntry(playerName, score));
++        Collections.sort(scores);
++        displayLeaderboard();
++    }
++
++    private void displayLeaderboard() {
++        StringBuilder leaderboardText = new StringBuilder();
++        leaderboardText.append("Rank\tPlayer Name\tScore\n");
++        List<ScoreEntry> topScores = getTopScores(10);
++        for (int i = 0; i < topScores.size(); i++) {
++            ScoreEntry entry = topScores.get(i);
++            leaderboardText.append(i + 1).append("\t").append(entry.getPlayerName()).append("\t").append(entry.getScore()).append("\n");
++        }
++        leaderboardTextArea.setText(leaderboardText.toString());
++    }
++
++    private List<ScoreEntry> getTopScores(int numTopScores) {
++        return scores.subList(0, Math.min(numTopScores, scores.size()));
++    }
++
++    public static void main(String[] args) {
++        Leaderboard leaderboard = new Leaderboard();
++        leaderboard.addScore("Player 1", 100);
++        leaderboard.addScore("Player 2", 150);
++        leaderboard.addScore("Player 3", 80);
++        leaderboard.addScore("Player 4", 200);
++        leaderboard.addScore("Player 5", 120);
++    }
++}
+\ No newline at end of file

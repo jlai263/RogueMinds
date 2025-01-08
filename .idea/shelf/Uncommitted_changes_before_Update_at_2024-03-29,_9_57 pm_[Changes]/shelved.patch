@@ -1,0 +1,534 @@
+Index: src/main/KeyHandler.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package main;\n\nimport GameStart.Main;\nimport object.Key;\n\nimport javax.swing.*;\nimport java.awt.event.KeyEvent;\nimport java.awt.event.KeyListener;\n\npublic class KeyHandler implements KeyListener {\n    GamePanel gp;\n    public Boolean upPressed = false;\n    public Boolean downPressed = false;\n    public Boolean leftPressed = false;\n    public Boolean rightPressed = false;\n\n\n    public KeyHandler (GamePanel gp){\n        this.gp = gp;\n    }\n    @Override\n    public void keyTyped(KeyEvent e) {\n    }\n\n    @Override\n    public void keyPressed(KeyEvent e) {\n        int code = e.getKeyCode();\n\n        if (code == KeyEvent.VK_W){\n            upPressed = true;\n        }\n        if (code == KeyEvent.VK_S){\n            downPressed = true;\n        }\n        if (code == KeyEvent.VK_A){\n            leftPressed = true;\n        }\n        if (code == KeyEvent.VK_D){\n            rightPressed = true;\n        }\n        if (code == KeyEvent.VK_P){\n            if (gp.gameState == gp.playState){\n                gp.gameState = gp.pauseState;\n            }\n            else if (gp.gameState == gp.pauseState) {\n                gp.gameState = gp.playState;\n            }\n        }\n        if (code == KeyEvent.VK_ESCAPE){\n            String[] mainScreen = new String[0];\n            gp.gameThread = null;\n            MathRogueQuest.window.setVisible(false);\n            MathRogueQuest.window.dispose();\n            Main.main(mainScreen);\n        }\n    }\n\n    @Override\n    public void keyReleased(KeyEvent e) {\n        int code = e.getKeyCode();\n\n        if (code == KeyEvent.VK_W){\n            upPressed = false;\n        }\n        if (code == KeyEvent.VK_S){\n            downPressed = false;\n        }\n        if (code == KeyEvent.VK_A){\n            leftPressed = false;\n        }\n        if (code == KeyEvent.VK_D){\n            rightPressed = false;\n        }\n\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/KeyHandler.java b/src/main/KeyHandler.java
+--- a/src/main/KeyHandler.java	(revision 350ca78097e94ed139aa8b29d873d6f70c703945)
++++ b/src/main/KeyHandler.java	(date 1711763778403)
+@@ -7,7 +7,7 @@
+ import java.awt.event.KeyEvent;
+ import java.awt.event.KeyListener;
+ 
+-public class KeyHandler implements KeyListener {
++public class KeyHandler extends JFrame implements KeyListener {
+     GamePanel gp;
+     public Boolean upPressed = false;
+     public Boolean downPressed = false;
+@@ -16,7 +16,11 @@
+ 
+ 
+     public KeyHandler (GamePanel gp){
++
+         this.gp = gp;
++        setTitle("Main Frame");
++        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
++        setSize(300, 200);
+     }
+     @Override
+     public void keyTyped(KeyEvent e) {
+@@ -47,11 +51,24 @@
+             }
+         }
+         if (code == KeyEvent.VK_ESCAPE){
+-            String[] mainScreen = new String[0];
+-            gp.gameThread = null;
+-            MathRogueQuest.window.setVisible(false);
+-            MathRogueQuest.window.dispose();
+-            Main.main(mainScreen);
++            int option = JOptionPane.showConfirmDialog(
++                    KeyHandler.this,
++                    "Are you sure you want to quit?\nYour progress will be saved.",
++                    "Quit Confirmation",
++                    JOptionPane.YES_NO_OPTION);
++
++            if (option == JOptionPane.YES_OPTION) {
++                gp.saveLoad.save();
++                String[] mainScreen = new String[0];
++                gp.gameThread = null;
++
++                MathRogueQuest.window.setVisible(false);
++                MathRogueQuest.window.dispose();
++                gp.music.stop();
++                Main.main(mainScreen);
++            }
++
++
+         }
+     }
+ 
+Index: src/GameStart/LoginPage.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package GameStart;\r\n\r\nimport javax.swing.*;\r\nimport java.awt.*;\r\n\r\npublic class LoginPage {\r\n    private JPanel panel;\r\n    private JTextField usernameField;\r\n    private JTextField passwordField;\r\n    private JTextField confirmPasswordField; // Only visible for New Game\r\n    private boolean isNewGame;\r\n\r\n    public LoginPage(JPanel panel) {\r\n        this.panel = panel;\r\n        initializeComponents();\r\n    }\r\n\r\n    private void initializeComponents() {\r\n        // Initialize text fields\r\n        usernameField = new JTextField(\"Username\");\r\n        passwordField = new JTextField(\"Password\");\r\n        confirmPasswordField = new JTextField(\"Confirm Password\");\r\n\r\n        // Set bounds or layout management here if necessary\r\n        // For example:\r\n        int fieldWidth = 200;\r\n        int fieldHeight = 30;\r\n        int startX = (panel.getWidth() - fieldWidth) / 2; // Center horizontally\r\n        int startY = 300; // Position vertically as needed\r\n        usernameField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n        passwordField.setBounds(startX, startY + 40, fieldWidth, fieldHeight);\r\n        confirmPasswordField.setBounds(startX, startY + 80, fieldWidth, fieldHeight);\r\n\r\n        // Add components to the panel but don't set them visible yet\r\n        panel.add(usernameField);\r\n        panel.add(passwordField);\r\n        panel.add(confirmPasswordField);\r\n\r\n        // Initially invisible\r\n        setVisibility(false);\r\n    }\r\n\r\n    public void setVisibility(boolean visible) {\r\n        // Toggle visibility based on the isNewGame flag\r\n        usernameField.setVisible(visible);\r\n        passwordField.setVisible(visible);\r\n        confirmPasswordField.setVisible(visible && isNewGame); // Only show confirm for New Game\r\n    }\r\n\r\n    public void setIsNewGame(boolean isNewGame) {\r\n        this.isNewGame = isNewGame;\r\n        confirmPasswordField.setVisible(isNewGame); // Adjust confirm password field visibility\r\n    }\r\n\r\n    // Additional methods for managing the login process...\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/GameStart/LoginPage.java b/src/GameStart/LoginPage.java
+--- a/src/GameStart/LoginPage.java	(revision 350ca78097e94ed139aa8b29d873d6f70c703945)
++++ b/src/GameStart/LoginPage.java	(date 1711661814634)
+@@ -2,10 +2,12 @@
+ 
+ import javax.swing.*;
+ import java.awt.*;
++import java.awt.event.ActionEvent;
++import java.awt.event.ActionListener;
+ 
+-public class LoginPage {
++public class LoginPage{
+     private JPanel panel;
+-    private JTextField usernameField;
++    public JTextField usernameField;
+     private JTextField passwordField;
+     private JTextField confirmPasswordField; // Only visible for New Game
+     private boolean isNewGame;
+@@ -15,12 +17,15 @@
+         initializeComponents();
+     }
+ 
++
+     private void initializeComponents() {
++
+         // Initialize text fields
+-        usernameField = new JTextField("Username");
++        usernameField = new JTextField("new Username");
+         passwordField = new JTextField("Password");
+         confirmPasswordField = new JTextField("Confirm Password");
+ 
++
+         // Set bounds or layout management here if necessary
+         // For example:
+         int fieldWidth = 200;
+@@ -51,6 +56,11 @@
+         this.isNewGame = isNewGame;
+         confirmPasswordField.setVisible(isNewGame); // Adjust confirm password field visibility
+     }
++    public String getUsernameInput() {
++        return usernameField.getText(); // Retrieve the text entered in the username field
++    }
++
++
+ 
+     // Additional methods for managing the login process...
+ }
+Index: src/GameStart/Main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package GameStart;\r\n\r\nimport main.MathRogueQuest;\r\n\r\nimport javax.sound.sampled.*;\r\nimport javax.swing.*;\r\nimport java.awt.*;\r\nimport java.awt.event.*;\r\nimport java.io.IOException;\r\n\r\npublic class Main extends JFrame {\r\n    private ImageIcon titleCardIcon;\r\n    private ImageIcon helpScreenIcon;\r\n    private ImageIcon scaledBackIcon;\r\n    private ImageIcon settingsBackgroundIcon;\r\n    private ImageIcon volumeOffIcon;\r\n    private ImageIcon volumeOnIcon;\r\n    private ImageIcon emptyFrameIcon;\r\n    private boolean showHelpScreen = false;\r\n    private boolean showSettingsPage = false;\r\n    private boolean showNewGameScreen = false;\r\n    private boolean showLoadGameScreen = false;\r\n    private boolean[][] volumeStates;\r\n    private SoundManager soundManager;\r\n    private JTextField newGameUserField, newGamePasswordField, loadGameUserField, loadGamePasswordField, confirmNewGamePasswordField;\r\n\r\n    public Main() {\r\n        setTitle(\"Math Quest: Rogue Minds\");\r\n        setSize(1000, 750);\r\n        setResizable(false);\r\n        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\r\n        titleCardIcon = new ImageIcon(getClass().getResource(\"/loginUi/titleCard.png\"));\r\n        helpScreenIcon = new ImageIcon(getClass().getResource(\"/loginUi/helpScreen.png\"));\r\n        settingsBackgroundIcon = new ImageIcon(getClass().getResource(\"/loginUi/settingScreen.png\"));\r\n        emptyFrameIcon = new ImageIcon(getClass().getResource(\"/loginUi/EmptyFrame.png\"));\r\n        volumeOffIcon = new ImageIcon(getClass().getResource(\"/loginUi/vOff.png\"));\r\n        volumeOnIcon = new ImageIcon(getClass().getResource(\"/loginUi/vOn.png\"));\r\n        ImageIcon backIcon = new ImageIcon(getClass().getResource(\"/loginUi/backButton.png\"));\r\n        Image backButton = backIcon.getImage().getScaledInstance((int) (backIcon.getIconWidth() * 0.30), (int) (backIcon.getIconHeight() * 0.75), Image.SCALE_SMOOTH);\r\n        scaledBackIcon = new ImageIcon(backButton);\r\n        volumeStates = new boolean[3][10];\r\n        for (int row = 0; row < volumeStates.length; row++) {\r\n            for (int col = 0; col < volumeStates[row].length; col++) {\r\n                volumeStates[row][col] = col < 5;\r\n            }\r\n        }\r\n        soundManager = new SoundManager(volumeStates);\r\n        SettingsPage settingsPage = new SettingsPage(settingsBackgroundIcon, scaledBackIcon, volumeOffIcon, volumeOnIcon, volumeStates, soundManager);\r\n    \r\n        // Initialize JTextField components here, before JPanel initialization\r\n        \r\n        newGameUserField = new JTextField(\"Enter a username\");\r\n        newGamePasswordField = new JTextField(\"Enter a password (must contain 1-8 character)\");\r\n        confirmNewGamePasswordField = new JTextField(\"Confirm Password\");\r\n        loadGameUserField = new JTextField(\"Username\");\r\n        loadGamePasswordField = new JTextField(\"Password\");\r\n\r\n    \r\n        // Configure JTextField components (size, visibility, etc.)\r\n        // This should be done after panel is initialized if you're adding them to the panel\r\n    \r\n        JPanel panel = new JPanel() {\r\n            @Override\r\n            protected void paintComponent(Graphics g) {\r\n                super.paintComponent(g);\r\n                if (showSettingsPage) {\r\n                    settingsPage.drawSettingsPage(this, g);\r\n                } else if (showHelpScreen) {\r\n                    helpScreenIcon.paintIcon(this, g, 0, 0);\r\n                    scaledBackIcon.paintIcon(this, g, 650, 125);\r\n                } else if (showNewGameScreen || showLoadGameScreen) {\r\n                    emptyFrameIcon.paintIcon(this, g, 0, 0);\r\n                    scaledBackIcon.paintIcon(this, g, 650, 125); // Assume this is the position for the back button\r\n                } else {\r\n                    titleCardIcon.paintIcon(this, g, 0, 0);\r\n                    drawIcons(g);\r\n                }\r\n            }\r\n\r\n            private void drawIcons(Graphics g) {\r\n                ImageIcon trophyIcon = new ImageIcon(getClass().getResource(\"/loginUi/trophy.png\"));\r\n                ImageIcon debugIcon = new ImageIcon(getClass().getResource(\"/loginUi/debug.png\"));\r\n                ImageIcon helpIcon = new ImageIcon(getClass().getResource(\"/loginUi/help.png\"));\r\n            \r\n                Graphics2D g2d = (Graphics2D) g.create(); // Create a copy of the Graphics instance for safe modifications\r\n            \r\n                g2d.setColor(Color.BLACK); // Set color for the squares\r\n            \r\n                // Set the stroke to a thicker line\r\n                Stroke originalStroke = g2d.getStroke(); // Preserve the original stroke\r\n                g2d.setStroke(new BasicStroke(3f)); // 3f defines the thickness of the stroke\r\n            \r\n                int padding = 5; // Padding around icon for the square\r\n                // Drawing black squares around icons with drawRect (for the outline) and thicker stroke\r\n                g2d.drawRect(10 - padding, 10 - padding, trophyIcon.getIconWidth() + 2 * padding, trophyIcon.getIconHeight() + 2 * padding);\r\n                g2d.drawRect(10 - padding, 75 - padding, debugIcon.getIconWidth() + 2 * padding, debugIcon.getIconHeight() + 2 * padding);\r\n                g2d.drawRect(10 - padding, 140 - padding, helpIcon.getIconWidth() + 2 * padding, helpIcon.getIconHeight() + 2 * padding);\r\n            \r\n                // Reset the stroke to the original to avoid affecting other graphics operations\r\n                g2d.setStroke(originalStroke);\r\n            \r\n                // Paint the icons over the squares\r\n                trophyIcon.paintIcon(this, g, 10, 10); // Draw trophy icon\r\n                debugIcon.paintIcon(this, g, 10, 75); // Draw bug icon\r\n                helpIcon.paintIcon(this, g, 10, 140); // Draw help icon\r\n                \r\n                g2d.dispose(); // Dispose of the graphics copy to release system resources\r\n            }\r\n        };\r\n        panel.setLayout(null); // Set the layout manager to null for absolute positioning of text fields\r\n        panel.setBackground(Color.decode(\"#3db6d1\"));\r\n    \r\n        // Set bounds and add text fields to panel here, after JPanel initialization\r\n        // Example bounds setting, adjust according to your layout\r\n        int fieldWidth = 200;\r\n        int fieldHeight = 30;\r\n        int startX = (getWidth() - fieldWidth) / 2; // Center horizontally\r\n        int startY = 300; // Position vertically as needed\r\n        newGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n        newGamePasswordField.setBounds(startX, startY + 35, fieldWidth, fieldHeight);\r\n        loadGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n        loadGamePasswordField.setBounds(startX, startY + 35, fieldWidth, fieldHeight);\r\n        confirmNewGamePasswordField.setBounds(startX, startY + 70, fieldWidth, fieldHeight);\r\n    \r\n        // Initially make text fields invisible\r\n        newGameUserField.setVisible(false);\r\n        newGamePasswordField.setVisible(false);\r\n        loadGameUserField.setVisible(false);\r\n        loadGamePasswordField.setVisible(false);\r\n        confirmNewGamePasswordField.setVisible(false);\r\n\r\n        // Add text fields to the panel\r\n        panel.add(newGameUserField);\r\n        panel.add(newGamePasswordField);\r\n        panel.add(loadGameUserField);\r\n        panel.add(loadGamePasswordField);\r\n        panel.add(confirmNewGamePasswordField);\r\n        \r\n        addMouseListenerAndKeyListeners(panel, settingsPage);\r\n        getContentPane().add(panel);\r\n        setVisible(true);\r\n    }\r\n    \r\n\r\n    private void addMouseListenerAndKeyListeners(JPanel panel, SettingsPage settingsPage) {\r\n        panel.addMouseListener(new MouseAdapter() {\r\n            @Override\r\n            public void mousePressed(MouseEvent e) {\r\n                int x = e.getX();\r\n                int y = e.getY();\r\n                // Check for back button click across different screens\r\n                if ((showHelpScreen || showSettingsPage || showNewGameScreen || showLoadGameScreen) && x >= 650 && x <= (650 + scaledBackIcon.getIconWidth()) && y >= 125 && y <= (125 + scaledBackIcon.getIconHeight())) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    // Reset screen flags\r\n                    showHelpScreen = false;\r\n                    showSettingsPage = false;\r\n                    showNewGameScreen = false;\r\n                    showLoadGameScreen = false;\r\n        \r\n                    // Hide text fields explicitly\r\n                    newGameUserField.setVisible(false);\r\n                    newGamePasswordField.setVisible(false);\r\n                    confirmNewGamePasswordField.setVisible(false);\r\n                    loadGameUserField.setVisible(false);\r\n                    loadGamePasswordField.setVisible(false);\r\n        \r\n                    // Repaint the panel to reflect changes\r\n                    panel.repaint();\r\n                } else if (showSettingsPage) {\r\n                    settingsPage.handleClick(e.getX(), e.getY(), panel);\r\n                } else if (!showHelpScreen && !showSettingsPage && !showNewGameScreen && !showLoadGameScreen) {\r\n                    checkIconClick(x, y);\r\n                }\r\n            }\r\n\r\n            private void checkIconClick(int x, int y) {\r\n                if (x >= 10 && x <= 60 && y >= 10 && y <= 60) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    System.out.println(\"Trophy room:\");\r\n                } else if (x >= 30 && x <= 220 && y >= 585 && y <= 645) {\r\n                    toggleNewGameScreen();\r\n                } else if (x >= 287 && x <= 477 && y >= 587 && y <= 647) {\r\n                    toggleLoadGameScreen();\r\n                } else if (x >= 10 && x <= 60 && y >= 80 && y <= 130) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    System.out.println(\"Debug mode\");\r\n                } else if (x >= 10 && x <= 60 && y >= 150 && y <= 200) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    toggleHelpScreen();\r\n                } else if (x >= 539 && x <= 729 && y >= 587 && y <= 647) {\r\n                    soundManager.playSound(\"/sound/selectSF.wav\");\r\n                    toggleSettingsPage();\r\n                } else if (x >= 781 && x <= 971 && y >= 587 && y <= 647) {\r\n                    System.exit(0);\r\n                }\r\n            }\r\n\r\n            private void toggleSettingsPage() {\r\n                showSettingsPage = !showSettingsPage;\r\n                showHelpScreen = false;\r\n                showNewGameScreen = false;\r\n                showLoadGameScreen = false;\r\n                panel.repaint();\r\n            }\r\n\r\n            private void toggleHelpScreen() {\r\n                showHelpScreen = !showHelpScreen;\r\n                showSettingsPage = false;\r\n                showNewGameScreen = false;\r\n                showLoadGameScreen = false;\r\n                panel.repaint();\r\n            }\r\n\r\n            private void toggleNewGameScreen() {\r\n                String newGame[] = new String[0];\r\n\r\n                MathRogueQuest.main(newGame);\r\n                setVisible(false);\r\n\r\n                /*\r\n                showNewGameScreen = !showNewGameScreen;\r\n                soundManager.playSound(\"/sound/selectSF.wav\");\r\n                // Ensure other screens are hidden\r\n                showHelpScreen = false;\r\n                showSettingsPage = false;\r\n                showLoadGameScreen = false;\r\n                // Update visibility and bounds of text fields for the New Game screen\r\n                updateTextFieldVisibilityAndPosition();\r\n\r\n                 */\r\n            }\r\n            \r\n            private void toggleLoadGameScreen() {\r\n                showLoadGameScreen = !showLoadGameScreen;\r\n                soundManager.playSound(\"/sound/selectSF.wav\");\r\n                // Ensure other screens are hidden\r\n                showHelpScreen = false;\r\n                showSettingsPage = false;\r\n                showNewGameScreen = false;\r\n                // Update visibility and bounds of text fields for the Load Game screen\r\n                updateTextFieldVisibilityAndPosition();\r\n            }\r\n            \r\n            private void updateTextFieldVisibilityAndPosition() {\r\n                int fieldWidth = 200;\r\n                int fieldHeight = 30;\r\n                // Use Main.this to refer to the enclosing JFrame instance\r\n                int startX = (Main.this.getWidth() - fieldWidth) / 2; // Center horizontally\r\n                int startY = 250; // Adjusted for additional field, position vertically as needed\r\n            \r\n                // Adjusting visibility based on the current screen\r\n                newGameUserField.setVisible(showNewGameScreen);\r\n                newGamePasswordField.setVisible(showNewGameScreen);\r\n                confirmNewGamePasswordField.setVisible(showNewGameScreen); // Only for New Game\r\n                loadGameUserField.setVisible(showLoadGameScreen);\r\n                loadGamePasswordField.setVisible(showLoadGameScreen);\r\n            \r\n                // Setting bounds; adjust startY for each subsequent field to stack them vertically\r\n                if (showNewGameScreen) {\r\n                    newGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n                    confirmNewGamePasswordField.setBounds(startX, startY + 40, fieldWidth, fieldHeight); // Confirm Password field\r\n                    newGamePasswordField.setBounds(startX, startY + 80, fieldWidth, fieldHeight);\r\n                }\r\n                if (showLoadGameScreen) {\r\n                    loadGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);\r\n                    loadGamePasswordField.setBounds(startX, startY + 40, fieldWidth, fieldHeight);\r\n                }\r\n            \r\n                // Ensure fields related to the other screen are not visible\r\n                if (!showNewGameScreen) {\r\n                    confirmNewGamePasswordField.setVisible(false); // Hide Confirm Password field when not on New Game screen\r\n                }\r\n            \r\n                // Use Main.this to refer to the JFrame for these methods\r\n                Main.this.validate();\r\n                Main.this.repaint();\r\n            }\r\n        });\r\n\r\n        addKeyListener(new KeyAdapter() {\r\n            @Override\r\n            public void keyPressed(KeyEvent e) {\r\n                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {\r\n                    dispose();\r\n                }\r\n            }\r\n        });\r\n    }\r\n\r\n    public static void main(String[] args) {\r\n        new Main();\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/GameStart/Main.java b/src/GameStart/Main.java
+--- a/src/GameStart/Main.java	(revision 350ca78097e94ed139aa8b29d873d6f70c703945)
++++ b/src/GameStart/Main.java	(date 1711763330806)
+@@ -1,5 +1,6 @@
+ package GameStart;
+ 
++import main.GamePanel;
+ import main.MathRogueQuest;
+ 
+ import javax.sound.sampled.*;
+@@ -18,13 +19,15 @@
+     private ImageIcon emptyFrameIcon;
+     private boolean showHelpScreen = false;
+     private boolean showSettingsPage = false;
+-    private boolean showNewGameScreen = false;
++    public boolean showNewGameScreen = false;
+     private boolean showLoadGameScreen = false;
+     private boolean[][] volumeStates;
+     private SoundManager soundManager;
+     private JTextField newGameUserField, newGamePasswordField, loadGameUserField, loadGamePasswordField, confirmNewGamePasswordField;
+ 
++
+     public Main() {
++
+         setTitle("Math Quest: Rogue Minds");
+         setSize(1000, 750);
+         setResizable(false);
+@@ -212,12 +215,11 @@
+             }
+ 
+             private void toggleNewGameScreen() {
+-                String newGame[] = new String[0];
++
++               String newGame[] = new String[0];
+ 
+-                MathRogueQuest.main(newGame);
+-                setVisible(false);
+ 
+-                /*
++
+                 showNewGameScreen = !showNewGameScreen;
+                 soundManager.playSound("/sound/selectSF.wav");
+                 // Ensure other screens are hidden
+@@ -227,10 +229,19 @@
+                 // Update visibility and bounds of text fields for the New Game screen
+                 updateTextFieldVisibilityAndPosition();
+ 
+-                 */
++                Login.main(newGame);
++
++
++
+             }
+             
+             private void toggleLoadGameScreen() {
++                String loadGame[] = new String[0];
++                GamePanel gp = new GamePanel();
++                gp.saveLoad.load();
++                MathRogueQuest.main(loadGame);
++
++                /*
+                 showLoadGameScreen = !showLoadGameScreen;
+                 soundManager.playSound("/sound/selectSF.wav");
+                 // Ensure other screens are hidden
+@@ -239,6 +250,8 @@
+                 showNewGameScreen = false;
+                 // Update visibility and bounds of text fields for the Load Game screen
+                 updateTextFieldVisibilityAndPosition();
++
++                 */
+             }
+             
+             private void updateTextFieldVisibilityAndPosition() {
+@@ -250,20 +263,19 @@
+             
+                 // Adjusting visibility based on the current screen
+                 newGameUserField.setVisible(showNewGameScreen);
+-                newGamePasswordField.setVisible(showNewGameScreen);
+-                confirmNewGamePasswordField.setVisible(showNewGameScreen); // Only for New Game
++               // newGamePasswordField.setVisible(showNewGameScreen);
++                //confirmNewGamePasswordField.setVisible(showNewGameScreen); // Only for New Game
+                 loadGameUserField.setVisible(showLoadGameScreen);
+                 loadGamePasswordField.setVisible(showLoadGameScreen);
+             
+                 // Setting bounds; adjust startY for each subsequent field to stack them vertically
+                 if (showNewGameScreen) {
+                     newGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);
+-                    confirmNewGamePasswordField.setBounds(startX, startY + 40, fieldWidth, fieldHeight); // Confirm Password field
+-                    newGamePasswordField.setBounds(startX, startY + 80, fieldWidth, fieldHeight);
++
+                 }
+                 if (showLoadGameScreen) {
+                     loadGameUserField.setBounds(startX, startY, fieldWidth, fieldHeight);
+-                    loadGamePasswordField.setBounds(startX, startY + 40, fieldWidth, fieldHeight);
++
+                 }
+             
+                 // Ensure fields related to the other screen are not visible
+Index: src/main/UI.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package main;\n\nimport object.Key;\n\nimport java.awt.*;\nimport java.awt.image.BufferedImage;\nimport java.text.DecimalFormat;\n\npublic class UI {\n    GamePanel gp;\n    Graphics2D g2;\n    Font font, font_bold;\n    BufferedImage keyImage;\n    public Boolean messageOn = false;\n    public String message = \"\";\n    int messageTimer = 0;\n    public Boolean endGame = false;\n    public double playTime;\n    DecimalFormat dFormat = new DecimalFormat(\"#0.00\");\n    public UI (GamePanel gp){\n        this.gp = gp;\n        font = new Font(\"Arial\", Font.PLAIN, 40);\n        font_bold = new Font(\"Arial\", Font.BOLD, 80);\n        Key key = new Key();\n        keyImage = key.image;\n    }\n\n    public void showMessage(String text){\n        message = text;\n        messageOn = true;\n    }\n\n    public void draw(Graphics2D g2){\n        this.g2 = g2;\n        g2.setFont(font);\n        g2.setColor(Color.white);\n\n        if (gp.gameState == gp.playState){\n\n        }\n        if (gp.gameState == gp.pauseState){\n            drawPauseScreen();\n        }\n        if (endGame == true){\n            g2.setFont(font);\n            g2.setColor(Color.white);\n\n            String text = \"You found the Treasure!!!\";\n            int textLength = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();\n\n            int x = gp.screenWidth/2 - textLength/2;\n            int y = gp.screenHeight/2 - (gp.tileSize*3);\n            g2.drawString(text, x, y);\n\n            text = \"Your time is : \" + dFormat.format(playTime) + \"!\";\n            textLength = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();\n\n            x = gp.screenWidth/2 - textLength/2;\n            y = gp.screenHeight/2 + (gp.tileSize*4);\n            g2.drawString(text, x, y);\n\n            g2.setFont(font_bold);\n            g2.setColor(Color.yellow);\n            text = \"Congratulations!\";\n            textLength = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();\n\n            x = gp.screenWidth/2 - textLength/2;\n            y = gp.screenHeight/2 + (gp.tileSize*2);\n            g2.drawString(text, x, y);\n\n            gp.gameThread = null; // End the game\n        }\n\n        else {\n            g2.setFont(font);\n            g2.setColor(Color.white);\n            g2.drawImage(keyImage, gp.tileSize/2, gp.tileSize/2, gp.tileSize, gp.tileSize, null);\n            g2.drawString(\" x  \"+ gp.player.hasCoin, 74, 65);\n\n            // Time\n            playTime += (double) 1/60;\n            g2.drawString(\"Time: \" + dFormat.format(playTime), gp.tileSize*11, 65);\n\n            // Screen Text\n            if (messageOn == true){\n                g2.setFont(g2.getFont().deriveFont(30F));\n                g2.drawString(message, gp.tileSize/2, gp.tileSize * 5);\n\n                messageTimer++;\n\n                if (messageTimer > 120){\n                    messageTimer = 0;\n                    messageOn = false;\n                }\n            }\n        }\n\n    }\n    public void drawPauseScreen(){\n        String text = \"PAUSED\";\n\n\n        int length = (int) g2.getFontMetrics().getStringBounds(text, g2).getWidth();\n        int x = gp.screenWidth/2 - length/2;\n        int y = gp.screenHeight/2 + 13;\n        g2.drawString(text, x, y);\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/UI.java b/src/main/UI.java
+--- a/src/main/UI.java	(revision 350ca78097e94ed139aa8b29d873d6f70c703945)
++++ b/src/main/UI.java	(date 1711576142950)
+@@ -31,6 +31,7 @@
+     }
+ 
+     public void draw(Graphics2D g2){
++        gp.player.time = playTime;
+         this.g2 = g2;
+         g2.setFont(font);
+         g2.setColor(Color.white);
+Index: src/main/GamePanel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package main;\n\nimport GameStart.Main;\nimport entities.Player;\nimport object.SuperObject;\nimport tile.TileManager;\n\nimport javax.swing.*;\nimport java.awt.*;\nimport java.awt.image.BufferedImage;\n\npublic class GamePanel extends JPanel implements Runnable{\n\n    // Creating Screen Settings\n    public final int originalTileSize = 16; // 16 x 16 tile pixel\n    public final int scale = 3; // tile multiplier\n    public final int tileSize = originalTileSize * scale;// 48 x 48 pixel size\n    public final int screenCols = 16;\n    public final int screenRows = 12;\n\n    public final int screenWidth = tileSize * screenCols; // Horizontal Length = 768 pixels\n    public final int screenHeight = tileSize * screenRows; // Vertical Length = 576 pixels\n    // Resolution = 768 x 576 //\n\n    // World Settings\n    public final int maxWorldCol = 50;\n    public final int maxWorldRow = 50;\n\n    // Full Screen\n    int screenWidth2 = screenWidth;\n    int screenHeight2 = screenHeight;\n    BufferedImage tempScreen;\n    Graphics2D g2;\n\n    final int FPS = 60;\n\n    KeyHandler keyH = new KeyHandler(this);\n\n    Sound music = new Sound();\n    Sound se = new Sound();\n    Thread gameThread; //Sets the Frames (fps)\n    public CollisionChecker cChecker = new CollisionChecker(this);\n    public ObjSetter oSetter = new ObjSetter(this);\n    public UI ui = new UI(this);\n    public Player player = new Player(this, keyH);\n    TileManager tileM = new TileManager(this);\n    public SuperObject obj[] = new SuperObject[10];\n\n    // Pause Feature\n    public int gameState = 1;\n    public final int playState = 1;\n    public final int pauseState = 2;\n\n\n\n    public GamePanel(){\n        this.setPreferredSize(new Dimension(screenWidth, screenHeight));\n        this.setBackground(Color.black);\n        this.setDoubleBuffered(true); // Sets true for offscreen painting buffers, improves distance rendering\n        this.addKeyListener(keyH);\n        this.setFocusable(true); // Panel to focus on keyboard inputs\n    }\n\n    public void setGameObj(){\n        oSetter.setObject();\n        playMusic(0);\n\n        //setFullScreen();\n    }\n\n    public void setFullScreen(){\n        // Get Local Screen Size\n        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();\n        GraphicsDevice gd = ge.getDefaultScreenDevice();\n        gd.setFullScreenWindow(MathRogueQuest.window);\n\n        // Full screen Width and Height\n        screenWidth2 = MathRogueQuest.window.getWidth();\n        screenHeight2 = MathRogueQuest.window.getHeight();\n    }\n\n\n\n    public void startGameThread(){\n        gameThread = new Thread(this);\n        gameThread.start();\n    }\n\n\n    public void run() {\n\n        double drawInterval = 1000000000/FPS;\n        // Calculation:\n        // 1 interval in 0.016 seconds, i.e. 60 intervals in 1 second\n        // so in a second 60 intervals(frames), FPS = 60;\n        double nextDrawTime = System.nanoTime() + drawInterval; //current time + 0.016 second interval\n\n        while(gameThread != null){\n\n            long currentTime= System.nanoTime();\n            //Update the character position on each key (character movement)\n            update();\n            //Draw the screen again with the updated information\n            repaint();\n\n\n\n            try {\n                double remainingTime = nextDrawTime - System.nanoTime(); // Time elapsed while running a single game thread\n                remainingTime = remainingTime/1000000; //Converting remaining time to milliseconds\n                if (remainingTime < 0) remainingTime = 0; //catching for system errors for bugs in the time loop\n                Thread.sleep((long) remainingTime); //Sleep creates the illusion of frames and motion\n\n                nextDrawTime += drawInterval;\n            } catch (InterruptedException e) {\n                throw new RuntimeException(e);\n            }\n        }\n    }\n\n    protected void update(){\n        if ( gameState == playState) {\n            player.update();\n        }\n        if (gameState == pauseState){\n\n        }\n    }\n\n\n    protected void paintComponent(Graphics g) {\n        super.paintComponent(g);\n\n        Graphics2D g2 = (Graphics2D) g;\n        //Tile\n        tileM.draw(g2);\n        //Objects\n        for (int i = 0; i < obj.length; i++){\n            if(obj[i] != null) obj[i].draw(g2, this);\n        }\n        //Player\n        player.draw(g2);\n\n        //UI\n        ui.draw(g2);\n\n        g2.dispose(); // Clear cache and saves memory\n    }\n\n    public void playMusic (int i){\n        music.setFile(i);\n        music.play();\n        music.loop();\n    }\n\n    public  void stopMusic(){music.stop();}\n    public void playSE(int i){\n        se.setFile(i);\n        se.play();\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/GamePanel.java b/src/main/GamePanel.java
+--- a/src/main/GamePanel.java	(revision 350ca78097e94ed139aa8b29d873d6f70c703945)
++++ b/src/main/GamePanel.java	(date 1711577930548)
+@@ -1,6 +1,7 @@
+ package main;
+ 
+ import GameStart.Main;
++import data.SaveLoad;
+ import entities.Player;
+ import object.SuperObject;
+ import tile.TileManager;
+@@ -36,6 +37,7 @@
+ 
+     KeyHandler keyH = new KeyHandler(this);
+ 
++
+     Sound music = new Sound();
+     Sound se = new Sound();
+     Thread gameThread; //Sets the Frames (fps)
+@@ -45,6 +47,7 @@
+     public Player player = new Player(this, keyH);
+     TileManager tileM = new TileManager(this);
+     public SuperObject obj[] = new SuperObject[10];
++    public SaveLoad saveLoad = new SaveLoad(this);
+ 
+     // Pause Feature
+     public int gameState = 1;
+Index: src/GameStart/UserDatabase.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/GameStart/UserDatabase.java b/src/GameStart/UserDatabase.java
+new file mode 100644
+--- /dev/null	(date 1711662720811)
++++ b/src/GameStart/UserDatabase.java	(date 1711662720811)
+@@ -0,0 +1,25 @@
++package GameStart;
++
++import java.util.HashMap;
++
++class UserDatabase {
++    private HashMap<String, User> userMap;
++
++    public UserDatabase() {
++        userMap = new HashMap<>();
++        // Add a sample user to the database
++        userMap.put("admin", new User("admin", "password"));
++    }
++
++    public void addUser(String username, String password) {
++        userMap.put(username, new User(username, password));
++    }
++
++    public User getUser(String username) {
++        return userMap.get(username);
++    }
++
++    public boolean containsUser(String username) {
++        return userMap.containsKey(username);
++    }
++}
+\ No newline at end of file
+Index: src/GameStart/Login.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/GameStart/Login.java b/src/GameStart/Login.java
+new file mode 100644
+--- /dev/null	(date 1711763565175)
++++ b/src/GameStart/Login.java	(date 1711763565175)
+@@ -0,0 +1,68 @@
++package GameStart;
++
++import main.MathRogueQuest;
++
++import javax.swing.*;
++import java.awt.event.ActionEvent;
++import java.awt.event.ActionListener;
++
++public class Login {
++    private static UserDatabase userDatabase = new UserDatabase();
++
++    public static void main(String[] args) {
++        JFrame frame = new JFrame("Login Screen");
++        JLabel userLabel = new JLabel("Username:");
++        JLabel passwordLabel = new JLabel("Password:");
++        JTextField userTextField = new JTextField();
++        JPasswordField passwordField = new JPasswordField();
++        JButton loginButton = new JButton("Login");
++
++        userLabel.setBounds(20, 20, 80, 25);
++        passwordLabel.setBounds(20, 50, 80, 25);
++        userTextField.setBounds(100, 20, 165, 25);
++        passwordField.setBounds(100, 50, 165, 25);
++        loginButton.setBounds(100, 80, 80, 25);
++
++        frame.add(userLabel);
++        frame.add(passwordLabel);
++        frame.add(userTextField);
++        frame.add(passwordField);
++        frame.add(loginButton);
++
++        frame.setSize(300, 200);
++        frame.setLayout(null);
++        frame.setVisible(true);
++        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
++
++        loginButton.addActionListener(new ActionListener() {
++            public void actionPerformed(ActionEvent e) {
++                String username = userTextField.getText();
++                String password = new String(passwordField.getPassword());
++
++                // Check if the user exists in the database
++                Main game = new Main();
++                String newGame[] = new String[0];
++                if (!game.showNewGameScreen){
++                    JOptionPane.showMessageDialog(frame, "Successfully created new user!");
++
++                        frame.setVisible(false);
++                        game.setVisible(false);
++
++                        MathRogueQuest.main(newGame);
++
++                }
++                else if (userDatabase.containsUser(username)) {
++                    User user = userDatabase.getUser(username);
++                    if (password.equals(user.getPassword())) {
++                        JOptionPane.showMessageDialog(frame, "Login Successful");
++
++                    } else {
++                        JOptionPane.showMessageDialog(frame, "Incorrect Password");
++                    }
++                } else {
++                    JOptionPane.showMessageDialog(frame, "User not found");
++                }
++            }
++        });
++    }
++}
+\ No newline at end of file
+Index: src/data/SaveLoad.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/data/SaveLoad.java b/src/data/SaveLoad.java
+new file mode 100644
+--- /dev/null	(date 1711657725658)
++++ b/src/data/SaveLoad.java	(date 1711657725658)
+@@ -0,0 +1,41 @@
++package data;
++
++import main.GamePanel;
++
++import java.io.*;
++
++public class SaveLoad {
++    GamePanel gp;
++    public SaveLoad(GamePanel gp){
++        this.gp = gp;
++    }
++    public void save(){
++        try {
++            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File("save.dat")));
++            DataStorage ds = new DataStorage();
++
++            ds.coins = gp.player.hasCoin;
++            ds.time = gp.player.time;
++            ds.username = gp.player.username;
++
++            // Write the Data Storage object
++            oos.writeObject(ds);
++
++        } catch (IOException e) {
++            System.out.println(e);
++        }
++    }
++    public void load(){
++        try {
++            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File("save.dat")));
++
++            // Read the Data Storage
++            DataStorage ds = (DataStorage) ois.readObject();
++            gp.player.time = ds.time;
++            gp.player.hasCoin = ds.coins;
++            gp.player.username = ds.username;
++        } catch (IOException | ClassNotFoundException e) {
++            System.out.println("Load Error!");
++        }
++    }
++}
+Index: src/data/DataStorage.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/data/DataStorage.java b/src/data/DataStorage.java
+new file mode 100644
+--- /dev/null	(date 1711575189514)
++++ b/src/data/DataStorage.java	(date 1711575189514)
+@@ -0,0 +1,9 @@
++package data;
++
++import java.io.Serializable;
++
++public class DataStorage implements Serializable {
++    String username;
++    int coins;
++    double time;
++}
+Index: save.dat
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>US-ASCII
+===================================================================
+diff --git a/save.dat b/save.dat
+new file mode 100644
+--- /dev/null	(date 1711763798205)
++++ b/save.dat	(date 1711763798205)
+@@ -0,0 +1,1 @@
++﷿﷿ sr data.DataStorageT8w﷿﷿﷿A I coinsD timeL usernamet Ljava/lang/String;xp    @$﷿﷿﷿﷿﷿p
+\ No newline at end of file
+Index: .idea/encodings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/encodings.xml b/.idea/encodings.xml
+new file mode 100644
+--- /dev/null	(date 1711657765495)
++++ b/.idea/encodings.xml	(date 1711657765495)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="Encoding">
++    <file url="file://$PROJECT_DIR$/save.dat" charset="US-ASCII" />
++  </component>
++</project>
+\ No newline at end of file
+Index: src/GameStart/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/GameStart/User.java b/src/GameStart/User.java
+new file mode 100644
+--- /dev/null	(date 1711662607441)
++++ b/src/GameStart/User.java	(date 1711662607441)
+@@ -0,0 +1,19 @@
++package GameStart;
++
++class User {
++    private String username;
++    private String password;
++
++    public User(String username, String password) {
++        this.username = username;
++        this.password = password;
++    }
++
++    public String getUsername() {
++        return username;
++    }
++
++    public String getPassword() {
++        return password;
++    }
++}
+Index: src/entities/Player.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package entities;\n\nimport main.GamePanel;\nimport main.KeyHandler;\n\nimport javax.imageio.ImageIO;\nimport java.awt.*;\nimport java.awt.image.BufferedImage;\nimport java.io.IOException;\n\npublic class Player extends Entity{\n    GamePanel gp;\n    KeyHandler keyH;\n    public final int screenX;\n    public final int screenY;\n    public int hasCoin = 0;\n\n    public Player(GamePanel gp, KeyHandler keyH){\n        this.gp = gp;\n        this.keyH = keyH;\n        screenX = gp.screenWidth/2 - (gp.tileSize/2);\n        screenY = gp.screenHeight/2 - (gp.tileSize/2);\n\n        solidArea = new Rectangle();\n        solidArea.x = 8;\n        solidArea.y = 16;\n        solidAreaDefaultX = solidArea.x;\n        solidAreaDefaultY = solidArea.y;\n        solidArea.width = 28;\n        solidArea.height = 28;\n\n        setDefaultValues();\n        getPlayerImage();\n    }\n    public void setDefaultValues(){\n        worldX = gp.tileSize * 23;\n        worldY = gp.tileSize * 21;\n        speed = 4;\n        direction = \"down\";\n    }\n\n    public void getPlayerImage(){\n\n        try {\n            up1 = ImageIO.read(getClass().getResourceAsStream(\"/player/up1.png\"));\n            up2 = ImageIO.read(getClass().getResourceAsStream(\"/player/up2.png\"));\n            down1 = ImageIO.read(getClass().getResourceAsStream(\"/player/d1.png\"));\n            down2 = ImageIO.read(getClass().getResourceAsStream(\"/player/d2.png\"));\n            left1 = ImageIO.read(getClass().getResourceAsStream(\"/player/l1.png\"));\n            left2 = ImageIO.read(getClass().getResourceAsStream(\"/player/l2.png\"));\n            right1 = ImageIO.read(getClass().getResourceAsStream(\"/player/r1.png\"));\n            right2 = ImageIO.read(getClass().getResourceAsStream(\"/player/r2.png\"));\n        }\n        catch (IOException e){\n            e.printStackTrace();\n        }\n    }\n\n    public void update(){\n\n        if ((keyH.upPressed == true || keyH.downPressed == true ||\n                keyH.leftPressed == true || keyH.rightPressed) == true){\n\n            if (keyH.upPressed == true){\n                direction = \"up\";\n\n            }\n            else if (keyH.downPressed == true){\n                direction = \"down\";\n\n            }\n            else if( keyH.leftPressed == true){\n                direction = \"left\";\n\n            }\n            else if (keyH.rightPressed == true){\n                direction = \"right\";\n\n            }\n\n            // Checking Tile Collision\n            collisionOn = false;\n            gp.cChecker.checkTile(this);\n\n            // Checking Object Collision\n            int objIndex = gp.cChecker.checkObject(this, true);\n            pickUpObject(objIndex);\n\n            //If Collision is false\n            if(collisionOn == false){\n                switch (direction){\n                    case \"up\":\n                        worldY -= speed;\n                        break;\n\n                    case \"down\":\n                        worldY += speed;\n                        break;\n\n                    case \"left\":\n                        worldX -= speed;\n                        break;\n\n                    case \"right\":\n                        worldX += speed;\n                        break;\n                }\n            }\n\n            spriteCounter++;\n            if (spriteCounter > 10){\n                if (spriteNum == 1) spriteNum = 2;\n                else if (spriteNum == 2) spriteNum =1;\n                spriteCounter = 0;\n            }\n\n        }\n\n    }\n\n    public void pickUpObject (int index){\n        // If there is object collision\n        if (index != 999){\n            String objectName = gp.obj[index].name;\n\n            switch (objectName){\n                case \"Key\":\n                    gp.playSE(1);\n                    hasCoin++;\n                    gp.obj[index] = null;\n                    gp.ui.showMessage(\"You got a Coin!\");\n                    break;\n\n                case \"Door\":\n                    if (hasCoin > 0){\n                        gp.playSE(3);\n                        gp.obj[index] = null;\n                        hasCoin--;\n                        gp.ui.showMessage(\"Ypu opened the Door!\");\n                    }\n                    else gp.ui.showMessage(\"You need a Coin to open the Door!\");\n                    break;\n\n                case \"Chest\":\n                    gp.ui.endGame = true;\n                    gp.stopMusic();\n                    gp.playSE(2);\n                    break;\n            }\n        }\n    }\n    public void draw(Graphics2D g2){\n        // white rect eg\n        //g2.setColor(Color.white);\n        //g2.fillRect(x, y, gp.tileSize, gp.tileSize);\n\n        BufferedImage image = null;\n\n        switch (direction){\n            case(\"up\"):\n                if (spriteNum == 1) image = up1;\n                if (spriteNum == 2) image = up2;\n                break;\n\n            case(\"down\"):\n                if (spriteNum == 1) image = down1;\n                if (spriteNum == 2) image = down2;\n                break;\n\n            case (\"left\"):\n                if (spriteNum == 1) image = left1;\n                if (spriteNum == 2) image = left2;\n                break;\n\n            case(\"right\"):\n                if (spriteNum == 1) image = right1;\n                if (spriteNum == 2) image = right2;\n                break;\n        }\n        g2.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);\n    }\n\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/entities/Player.java b/src/entities/Player.java
+--- a/src/entities/Player.java	(revision 350ca78097e94ed139aa8b29d873d6f70c703945)
++++ b/src/entities/Player.java	(date 1711575949517)
+@@ -14,6 +14,8 @@
+     public final int screenX;
+     public final int screenY;
+     public int hasCoin = 0;
++    public double time;
++    public String username;
+ 
+     public Player(GamePanel gp, KeyHandler keyH){
+         this.gp = gp;
