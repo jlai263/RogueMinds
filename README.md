@@ -100,10 +100,6 @@ mvn test
 
 ---
 
-## Contributing
-If you’d like to contribute to the project, please follow the guidelines outlined in `CONTRIBUTING.md`.
-
----
 
 ## License
 This project is licensed under the MIT License - see the `LICENSE` file for details.
